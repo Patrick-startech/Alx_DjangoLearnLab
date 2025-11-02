@@ -11,4 +11,3 @@ This is the initial Django project setup for the ALX Backend milestone.
 
 ```bash
 python3 manage.py runserver
-
