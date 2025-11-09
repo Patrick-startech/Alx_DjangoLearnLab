@@ -16,6 +16,7 @@ class LibraryDetailView(DetailView):
     template_name = 'relationship_app/library_detail.html'  # Required for milestone check
     context_object_name = 'library'
 
+from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -45,3 +46,4 @@ def register_view(request):
     else:
         form = UserCreationForm()
     return render(request, 'relationship_app/register.html', {'form': form})
+
