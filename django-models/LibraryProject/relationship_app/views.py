@@ -29,8 +29,8 @@ def login_view(request):
             login(request, user)
             return redirect('list_books')  # Redirect to any page after login
     else:
-        form = AuthenticationForm()
-    return render(request, 'relationship_app/login.html', {'form': form})
+        form = UserCreationForm()
+    return render(request, 'relationship_app/register.html', {'form': form})
 
 def logout_view(request):
     logout(request)
