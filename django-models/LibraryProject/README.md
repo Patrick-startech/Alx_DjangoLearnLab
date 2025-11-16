@@ -1,8 +1,13 @@
-Permissions and Groups Setup:
+# LibraryProject
 
-Book model has custom permissions: can_view, can_create, can_edit, can_delete
-Groups:
-Admins: all permissions
-Editors: can_create, can_edit
-Viewers: can_view
-Use @permission_required('relationship_app.') in views to enforce permissions
+This is the initial Django project setup for the ALX Backend milestone.
+
+## Project Structure
+
+- `LibraryProject/`: Django configuration files
+- `manage.py`: Django command-line utility
+
+## Setup Instructions
+
+```bash
+python3 manage.py runserver
