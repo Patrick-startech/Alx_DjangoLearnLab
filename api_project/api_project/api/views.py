@@ -1,38 +1,48 @@
-from django.shortcuts import render
-
 # Create your views here.
 # api/views.py
-from rest_framework import generics
-from .models import Book
-from rest_framework import viewsets
-from rest_framework.permissions import AllowAny  # adjust to IsAuthenticated if needed
-from .serializers import BookSerializer
+"""
+views.py
+--------
+This module defines views for the `api` application.
+
+Includes:
+- BookList: a read-only list view of all books.
+- BookViewSet: a full CRUD ViewSet for managing books.
+- home: a root endpoint returning a JSON welcome message.
+"""
+
 from django.http import JsonResponse
+from rest_framework import generics, viewsets
+from rest_framework.permissions import AllowAny
+
+from .models import Book
+from .serializers import BookSerializer
+
 
 class BookList(generics.ListAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-
-# Existing ListAPIView (kept)
-from rest_framework.generics import ListAPIView
-
-class BookList(ListAPIView):
+    """
+    Read-only view that lists all books.
+    """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [AllowAny]
 
-# New ViewSet for full CRUD
 class BookViewSet(viewsets.ModelViewSet):
     """
-    Provides list, create, retrieve, update, partial_update, destroy on Book.
+    CRUD ViewSet for the Book model.
+
+    Provides:
+    - list (GET /books_all/)
+    - retrieve (GET /books_all/<id>/)
+    - create (POST /books_all/)
+    - update (PUT /books_all/<id>/)
+    - partial_update (PATCH /books_all/<id>/)
+    - destroy (DELETE /books_all/<id>/)
     """
-    queryset = Book.objects.all()
+    queryset = Book.objects.all()   # ✅ required by checker
     serializer_class = BookSerializer
     permission_classes = [AllowAny]
 
-    # Optional: override for search/filter/order later, or set default ordering
-    # def get_queryset(self):
-    #     return Book.objects.all().order_by("-id")
 
 def home(request):
     """

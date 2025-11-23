@@ -37,10 +37,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     'rest_framework', # Added
-    'api', # Added
+    'rest_framework.authtoken',   # Required for Token model and obtain view
+    'api', # your app that contains models/views
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        # You can also support session auth for browsable API:
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # default lock-down
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
