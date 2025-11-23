@@ -14,9 +14,24 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+"""
+Project-level URL configuration for api_project.
+
+This file maps the root URL, admin interface, and includes
+all routes from the `api` application.
+"""
+
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from api import views  # import views module from the api app
 
 urlpatterns = [
+    # Root URL mapped to a simple home view
+    path('', views.home, name='home'),
+
+    # Django admin interface
     path('admin/', admin.site.urls),
+
+    # API endpoints routed through the api app
+    path('api/', include('api.urls')),
 ]
