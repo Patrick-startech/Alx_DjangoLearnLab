@@ -14,7 +14,6 @@ into complex types after validation.
 from rest_framework import serializers
 from .models import Book
 
-
 class BookSerializer(serializers.ModelSerializer):
     """
     Serializer for the Book model.
@@ -33,5 +32,5 @@ class BookSerializer(serializers.ModelSerializer):
         model = Book
         fields = '__all__'  # include all fields defined in the Book model
         # Alternatively, you could explicitly list fields for clarity:
-        # fields = ['id', 'title', 'author']
+        # fields = ['id', 'title', 'author'] and added ['published_date', 'created_at']
 
