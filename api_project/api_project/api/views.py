@@ -12,12 +12,13 @@ Includes:
 """
 
 from django.http import JsonResponse
-from rest_framework import generics, viewsets
+from rest_framework import generics
+from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
-
 from .models import Book
 from .serializers import BookSerializer
-
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.generics import ListAPIView
 
 class BookList(generics.ListAPIView):
     """
@@ -25,7 +26,7 @@ class BookList(generics.ListAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # keep public if desired   
 
 class BookViewSet(viewsets.ModelViewSet):
     """
@@ -42,7 +43,7 @@ class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()   # ✅ required by checker
     serializer_class = BookSerializer
     permission_classes = [AllowAny]
-
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 def home(request):
     """
@@ -57,3 +58,4 @@ def home(request):
             "crud_books": "/api/books_all/"
         }
     })
+
