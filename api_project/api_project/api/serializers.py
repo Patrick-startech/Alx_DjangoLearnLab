@@ -1,16 +1,3 @@
-# api/serializers.py
-"""
-serializers.py
----------------
-This module defines serializers for the `api` application.
-
-Serializers in Django REST Framework (DRF) are responsible for converting
-complex data types such as Django model instances into native Python datatypes
-that can then be easily rendered into JSON, XML, or other content types.
-They also provide deserialization, allowing parsed data to be converted back
-into complex types after validation.
-"""
-
 from rest_framework import serializers
 from .models import Book
 
