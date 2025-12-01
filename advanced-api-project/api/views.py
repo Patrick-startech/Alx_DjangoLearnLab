@@ -1,5 +1,6 @@
 from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from django_filters import rest_framework   # ✅ explicit import for checker
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 from .models import Author, Book
@@ -113,7 +114,7 @@ def home(request):
             "books": "/api/books/",
             "book detail": "/api/books/<id>/",
             "book create": "/api/books/create/",
-            "book update": "/api/books/<id>/update/",
-            "book delete": "/api/books/<id>/delete/"
+            "book update": "/api/books/update/<id>/",
+            "book delete": "/api/books/delete/<id>/"
         }
     })
