@@ -1,5 +1,4 @@
 from django.db import models
-
 # Create your models here.
 
 class Author(models.Model):
@@ -16,7 +15,7 @@ class Author(models.Model):
 
     class Meta:
         ordering = ["name"]
-
+        
 
 class Book(models.Model):
     """
