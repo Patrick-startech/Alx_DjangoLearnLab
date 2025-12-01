@@ -6,15 +6,15 @@ from .views import (
     BookCreateView,
     BookUpdateView,
     BookDeleteView,
+    home,
 )
 
 urlpatterns = [
-    # Author endpoints
+    path("", home, name="home"),
     path("authors/", AuthorListView.as_view(), name="author-list"),
-    # Book endpoints
     path("books/", BookListView.as_view(), name="book-list"),
     path("books/<int:pk>/", BookDetailView.as_view(), name="book-detail"),
     path("books/create/", BookCreateView.as_view(), name="book-create"),
-    path("books/<int:pk>/update/", BookUpdateView.as_view(), name="book-update"),
-    path("books/<int:pk>/delete/", BookDeleteView.as_view(), name="book-delete"),
+    path("books/update/<int:pk>/", BookUpdateView.as_view(), name="book-update"),   # ✅ added
+    path("books/delete/<int:pk>/", BookDeleteView.as_view(), name="book-delete"),   # ✅ added
 ]
