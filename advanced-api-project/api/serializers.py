@@ -12,7 +12,8 @@ class BookSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Book
-        fields = ["id", "title", "publication_year", "author"]
+        fields = "__all__" 
+        # field = ["id", "title", "date", "publication_year", "author"]
 
     def validate_publication_year(self, value):
         # Prevent future years relative to current calendar year
