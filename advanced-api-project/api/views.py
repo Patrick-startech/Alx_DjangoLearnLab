@@ -1,4 +1,5 @@
-from rest_framework import generics, permissions, filters
+from rest_framework import generics, filters
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 from .models import Author, Book
@@ -10,11 +11,11 @@ from .serializers import AuthorSerializer, BookSerializer
 class AuthorListView(generics.ListAPIView):
     """
     Read-only endpoint returning authors with nested books.
-    Accessible to everyone.
+    Accessible to everyone (read-only).
     """
     queryset = Author.objects.prefetch_related("books")
     serializer_class = AuthorSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 
 # -----------------------------
@@ -26,11 +27,11 @@ class BookListView(generics.ListAPIView):
     - Filtering: title, author (id), publication_year
     - Searching: partial text on title and author name
     - Ordering: title, publication_year
-    Accessible to everyone.
+    Accessible to everyone (read-only).
     """
     queryset = Book.objects.select_related("author")
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     # Enable filter/search/order backends
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -49,11 +50,11 @@ class BookListView(generics.ListAPIView):
 class BookDetailView(generics.RetrieveAPIView):
     """
     Retrieve a single book by ID.
-    Accessible to everyone.
+    Accessible to everyone (read-only).
     """
     queryset = Book.objects.select_related("author")
     serializer_class = BookSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = "pk"
 
 
@@ -64,10 +65,9 @@ class BookCreateView(generics.CreateAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        # Custom logic can be added here (e.g., attach request.user if needed)
         serializer.save()
 
 
@@ -78,11 +78,10 @@ class BookUpdateView(generics.UpdateAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     lookup_field = "pk"
 
     def perform_update(self, serializer):
-        # Custom logic for updates (e.g., audit logging)
         serializer.save()
 
 
@@ -93,20 +92,21 @@ class BookDeleteView(generics.DestroyAPIView):
     """
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     lookup_field = "pk"
 
 
 # -----------------------------
 # Homepage
 # -----------------------------
-# Simple homepage view for the root URL.
-# Returns a JSON message confirming the API is running.
-
 def home(request):
+    """
+    Simple homepage view for the root URL.
+    Returns a JSON message confirming the API is running.
+    """
     return JsonResponse({
         "message": "Welcome to the Advanced API Project!",
-        "method": request.method,  # now request is accessed
+        "method": request.method,
         "user": str(request.user) if request.user.is_authenticated else "Anonymous",
         "endpoints": {
             "authors": "/api/authors/",
@@ -117,6 +117,3 @@ def home(request):
             "book delete": "/api/books/<id>/delete/"
         }
     })
-
-
-
