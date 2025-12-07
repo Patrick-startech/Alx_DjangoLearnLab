@@ -19,9 +19,7 @@ from .models import Post, Comment, Tag
 # -------------------------
 def index(request):
     """Homepage view."""
-    return render(request, 'blog/index.html', {
-        'title': 'Home'
-    })
+    return render(request, 'blog/index.html', {'title': 'Home'})
 
 
 # -------------------------
@@ -64,10 +62,7 @@ def register(request):
             messages.error(request, "Registration failed. Please correct the errors below.")
     else:
         form = RegisterForm()
-    return render(request, 'blog/auth/register.html', {
-        'form': form,
-        'title': 'Register'
-    })
+    return render(request, 'blog/auth/register.html', {'form': form, 'title': 'Register'})
 
 
 @login_required
@@ -84,16 +79,14 @@ def profile(request):
             messages.error(request, "Update failed. Please correct the errors below.")
     else:
         form = ProfileForm(instance=request.user)
-    return render(request, 'blog/auth/profile.html', {
-        'form': form,
-        'title': 'Profile'
-    })
+    return render(request, 'blog/auth/profile.html', {'form': form, 'title': 'Profile'})
 
 
 # -------------------------
 # Post Views (CRUD)
 # -------------------------
 class PostListView(ListView):
+    """List all posts."""
     model = Post
     template_name = 'blog/posts/post_list.html'
     context_object_name = 'posts'
@@ -101,6 +94,7 @@ class PostListView(ListView):
 
 
 class PostDetailView(DetailView):
+    """Show a single post with its comments."""
     model = Post
     template_name = 'blog/posts/post_detail.html'
     context_object_name = 'post'
@@ -108,11 +102,11 @@ class PostDetailView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['comments'] = self.object.comments.all()
-        ctx['comment_form'] = None  # you can pass a CommentForm here if defined
         return ctx
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
+    """Create a new post."""
     model = Post
     form_class = PostForm
     template_name = 'blog/posts/post_form.html'
@@ -124,6 +118,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """Update an existing post."""
     model = Post
     form_class = PostForm
     template_name = 'blog/posts/post_form.html'
@@ -137,6 +132,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """Delete a post."""
     model = Post
     template_name = 'blog/posts/post_confirm_delete.html'
     success_url = reverse_lazy('blog:post_list')
@@ -150,9 +146,62 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 # -------------------------
+# Comment Views (CRUD)
+# -------------------------
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    """Add a new comment to a post."""
+    model = Comment
+    fields = ['content']
+    template_name = 'blog/comments/comment_form.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = Post.objects.get(pk=self.kwargs['post_id'])
+        messages.success(self.request, "Comment added successfully.")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('blog:post_detail', kwargs={'pk': self.kwargs['post_id']})
+
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """Edit an existing comment."""
+    model = Comment
+    fields = ['content']
+    template_name = 'blog/comments/comment_form.html'
+
+    def test_func(self):
+        return self.request.user == self.get_object().author
+
+    def form_valid(self, form):
+        messages.success(self.request, "Comment updated successfully.")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('blog:post_detail', kwargs={'pk': self.object.post.pk})
+
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """Delete a comment."""
+    model = Comment
+    template_name = 'blog/comments/comment_confirm_delete.html'
+
+    def test_func(self):
+        return self.request.user == self.get_object().author
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Comment deleted successfully.")
+        return super().delete(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('blog:post_detail', kwargs={'pk': self.object.post.pk})
+
+
+# -------------------------
 # Tag & Search Views
 # -------------------------
 class TagPostListView(ListView):
+    """List posts filtered by a tag."""
     model = Post
     template_name = 'blog/tags/tag_posts.html'
     context_object_name = 'posts'
@@ -168,6 +217,7 @@ class TagPostListView(ListView):
 
 
 class SearchResultsView(ListView):
+    """Search posts by title, content, or tags."""
     model = Post
     template_name = 'blog/search/results.html'
     context_object_name = 'posts'
@@ -186,4 +236,3 @@ class SearchResultsView(ListView):
         ctx = super().get_context_data(**kwargs)
         ctx['query'] = self.request.GET.get('q', '').strip()
         return ctx
-
