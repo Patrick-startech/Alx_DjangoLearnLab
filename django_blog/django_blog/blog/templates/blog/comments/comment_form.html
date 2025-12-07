@@ -1,0 +1,15 @@
+{% extends 'blog/base.html' %}
+{% block title %}Edit comment{% endblock %}
+{% block content %}
+<h1>Edit your comment</h1>
+<form method="post" novalidate>
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <div>
+    {{ form.content }}
+    {{ form.content.errors }}
+  </div>
+  <button type="submit">Save</button>
+  <a href="{% url 'blog:post_detail' object.post.pk %}">Cancel</a>
+</form>
+{% endblock %}
