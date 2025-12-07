@@ -29,7 +29,6 @@ def index(request):
 # -------------------------
 @method_decorator(csrf_protect, name='dispatch')
 class BlogLoginView(LoginView):
-    """Login view using Django’s built-in LoginView."""
     template_name = 'blog/auth/login.html'
 
     def form_invalid(self, form):
@@ -42,7 +41,6 @@ class BlogLoginView(LoginView):
 
 
 class BlogLogoutView(LogoutView):
-    """Logout view using Django’s built-in LogoutView."""
     next_page = 'blog:index'
 
     def dispatch(self, request, *args, **kwargs):
@@ -52,7 +50,6 @@ class BlogLogoutView(LogoutView):
 
 @csrf_protect
 def register(request):
-    """User registration view."""
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -73,7 +70,6 @@ def register(request):
 @login_required
 @csrf_protect
 def profile(request):
-    """Profile management view for authenticated users."""
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=request.user)
         if form.is_valid():
@@ -108,7 +104,6 @@ class PostDetailView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['comments'] = self.object.comments.all()
-        ctx['comment_form'] = None  # you can pass a CommentForm here if defined
         return ctx
 
 
@@ -150,6 +145,55 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 # -------------------------
+# Comment Views (CRUD)
+# -------------------------
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    fields = ['content']
+    template_name = 'blog/comments/comment_form.html'
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        form.instance.post = Post.objects.get(pk=self.kwargs['post_id'])
+        messages.success(self.request, "Comment added successfully.")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('blog:post_detail', kwargs={'pk': self.kwargs['post_id']})
+
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    fields = ['content']
+    template_name = 'blog/comments/comment_form.html'
+
+    def test_func(self):
+        return self.request.user == self.get_object().author
+
+    def form_valid(self, form):
+        messages.success(self.request, "Comment updated successfully.")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('blog:post_detail', kwargs={'pk': self.object.post.pk})
+
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = 'blog/comments/comment_confirm_delete.html'
+
+    def test_func(self):
+        return self.request.user == self.get_object().author
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Comment deleted successfully.")
+        return super().delete(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('blog:post_detail', kwargs={'pk': self.object.post.pk})
+
+
+# -------------------------
 # Tag & Search Views
 # -------------------------
 class TagPostListView(ListView):
@@ -186,4 +230,3 @@ class SearchResultsView(ListView):
         ctx = super().get_context_data(**kwargs)
         ctx['query'] = self.request.GET.get('q', '').strip()
         return ctx
-
