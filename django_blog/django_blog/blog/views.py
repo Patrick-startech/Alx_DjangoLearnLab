@@ -11,7 +11,8 @@ from django.urls import reverse_lazy
 from django.db.models import Q
 
 from .forms import RegisterForm, ProfileForm, PostForm
-from .models import Post, Comment, Tag
+from .models import Post, Comment
+from taggit.models import Tag   # <-- import Tag from taggit, not blog.models
 
 
 # -------------------------
@@ -19,9 +20,7 @@ from .models import Post, Comment, Tag
 # -------------------------
 def index(request):
     """Homepage view."""
-    return render(request, 'blog/index.html', {
-        'title': 'Home'
-    })
+    return render(request, 'blog/index.html', {'title': 'Home'})
 
 
 # -------------------------
@@ -29,6 +28,7 @@ def index(request):
 # -------------------------
 @method_decorator(csrf_protect, name='dispatch')
 class BlogLoginView(LoginView):
+    """Login view using Django’s built-in LoginView."""
     template_name = 'blog/auth/login.html'
 
     def form_invalid(self, form):
@@ -41,6 +41,7 @@ class BlogLoginView(LoginView):
 
 
 class BlogLogoutView(LogoutView):
+    """Logout view using Django’s built-in LogoutView."""
     next_page = 'blog:index'
 
     def dispatch(self, request, *args, **kwargs):
@@ -50,6 +51,7 @@ class BlogLogoutView(LogoutView):
 
 @csrf_protect
 def register(request):
+    """User registration view."""
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
@@ -61,15 +63,13 @@ def register(request):
             messages.error(request, "Registration failed. Please correct the errors below.")
     else:
         form = RegisterForm()
-    return render(request, 'blog/auth/register.html', {
-        'form': form,
-        'title': 'Register'
-    })
+    return render(request, 'blog/auth/register.html', {'form': form, 'title': 'Register'})
 
 
 @login_required
 @csrf_protect
 def profile(request):
+    """Profile management view for authenticated users."""
     if request.method == 'POST':
         form = ProfileForm(request.POST, instance=request.user)
         if form.is_valid():
@@ -80,16 +80,14 @@ def profile(request):
             messages.error(request, "Update failed. Please correct the errors below.")
     else:
         form = ProfileForm(instance=request.user)
-    return render(request, 'blog/auth/profile.html', {
-        'form': form,
-        'title': 'Profile'
-    })
+    return render(request, 'blog/auth/profile.html', {'form': form, 'title': 'Profile'})
 
 
 # -------------------------
 # Post Views (CRUD)
 # -------------------------
 class PostListView(ListView):
+    """List all posts."""
     model = Post
     template_name = 'blog/posts/post_list.html'
     context_object_name = 'posts'
@@ -97,6 +95,7 @@ class PostListView(ListView):
 
 
 class PostDetailView(DetailView):
+    """Show a single post with its comments."""
     model = Post
     template_name = 'blog/posts/post_detail.html'
     context_object_name = 'post'
@@ -108,6 +107,7 @@ class PostDetailView(DetailView):
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):
+    """Create a new post."""
     model = Post
     form_class = PostForm
     template_name = 'blog/posts/post_form.html'
@@ -119,6 +119,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """Update an existing post."""
     model = Post
     form_class = PostForm
     template_name = 'blog/posts/post_form.html'
@@ -132,6 +133,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """Delete a post."""
     model = Post
     template_name = 'blog/posts/post_confirm_delete.html'
     success_url = reverse_lazy('blog:post_list')
@@ -148,6 +150,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 # Comment Views (CRUD)
 # -------------------------
 class CommentCreateView(LoginRequiredMixin, CreateView):
+    """Add a new comment to a post."""
     model = Comment
     fields = ['content']
     template_name = 'blog/comments/comment_form.html'
@@ -163,6 +166,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
 
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """Edit an existing comment."""
     model = Comment
     fields = ['content']
     template_name = 'blog/comments/comment_form.html'
@@ -179,6 +183,7 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """Delete a comment."""
     model = Comment
     template_name = 'blog/comments/comment_confirm_delete.html'
 
@@ -197,13 +202,14 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 # Tag & Search Views
 # -------------------------
 class TagPostListView(ListView):
+    """List posts filtered by a tag."""
     model = Post
     template_name = 'blog/tags/tag_posts.html'
     context_object_name = 'posts'
 
     def get_queryset(self):
         self.tag = Tag.objects.get(slug=self.kwargs['slug'])
-        return Post.objects.filter(tags=self.tag)
+        return Post.objects.filter(tags__in=[self.tag])
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -212,6 +218,7 @@ class TagPostListView(ListView):
 
 
 class SearchResultsView(ListView):
+    """Search posts by title, content, or tags."""
     model = Post
     template_name = 'blog/search/results.html'
     context_object_name = 'posts'
