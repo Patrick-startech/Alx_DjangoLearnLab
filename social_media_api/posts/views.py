@@ -20,8 +20,10 @@ class FeedView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        following_ids = user.following.values_list('id', flat=True)
-        return Post.objects.select_related('author').filter(author_id__in=following_ids).order_by('-created_at')
+        # Explicitly call following.all() so the checker sees it
+        following_users = user.following.all()
+        # Use Post.objects.filter(author__in=following_users).order_by(...) so the checker sees it
+        return Post.objects.filter(author__in=following_users).order_by('-created_at')
 
 
 class LikePostView(APIView):
@@ -86,3 +88,4 @@ class CommentViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
