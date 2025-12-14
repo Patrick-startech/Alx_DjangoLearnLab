@@ -39,6 +39,7 @@ class RegisterForm(UserCreationForm):
             'password1': "Your password must be at least 8 characters long.",
             'password2': "Enter the same password again for verification.",
         }
+    
 
     def clean_email(self):
         email = self.cleaned_data['email'].lower()
@@ -87,7 +88,6 @@ class ProfileForm(forms.ModelForm):
             raise forms.ValidationError('This email is already in use by another account.')
         return email
 
-
 class PostForm(forms.ModelForm):
     """Form for creating and updating blog posts with tags."""
 
@@ -104,11 +104,16 @@ class PostForm(forms.ModelForm):
                 'class': 'form-control',
                 'rows': 8
             }),
-            'tags': TagWidget(attrs={
-                'placeholder': 'Comma-separated tags (e.g. django, web, tutorial)',
-                'class': 'form-control'
-            }),
         }
+
+    # Explicitly override the tags field to use TagWidget()
+    tags = forms.CharField(
+        widget=TagWidget(attrs={
+            'placeholder': 'Comma-separated tags (e.g. django, web, tutorial)',
+            'class': 'form-control'
+        }),
+        required=False
+    )
 
 
 class CommentForm(forms.ModelForm):
