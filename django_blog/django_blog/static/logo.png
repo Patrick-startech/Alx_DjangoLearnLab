@@ -1,1 +1,0 @@
-<img src="{% static 'img/logo.png' %}" alt="Site Logo">
