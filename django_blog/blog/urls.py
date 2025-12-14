@@ -33,10 +33,12 @@ urlpatterns = [
     path('post/<int:pk>/update/', PostUpdateView.as_view(), name='post_update'),  # <-- updated
     path('post/<int:pk>/delete/', PostDeleteView.as_view(), name='post_delete'),
 
-    # Comments CRUD
-    path('post/<int:post_id>/comment/new/', CommentCreateView.as_view(), name='comment_create'),
+    
+        # Comments CRUD
+    path('post/<int:pk>/comments/new/', CommentCreateView.as_view(), name='comment_create'),
     path('comment/<int:pk>/update/', CommentUpdateView.as_view(), name='comment_update'),
     path('comment/<int:pk>/delete/', CommentDeleteView.as_view(), name='comment_delete'),
+
 
     # Tags & Search
     path('tag/<slug:slug>/', TagPostListView.as_view(), name='tag_posts'),
