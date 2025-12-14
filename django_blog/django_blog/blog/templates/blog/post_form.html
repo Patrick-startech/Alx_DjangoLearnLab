@@ -1,11 +1,32 @@
 {% extends 'blog/base.html' %}
-{% block title %}{{ view.action|default:"New Post" }}{% endblock %}
+{% block title %}{% if view.object %}Edit Post{% else %}Create New Post{% endif %}{% endblock %}
 {% block content %}
-<h1>{{ view.action|default:"Create Post" }}</h1>
+<h1>{% if view.object %}Edit Post{% else %}Create New Post{% endif %}</h1>
 
-<form method="post" novalidate>
+<form method="post" novalidate class="post-form">
   {% csrf_token %}
-  {{ form.as_p }}
+  {{ form.non_field_errors }}
+
+  <div class="form-group">
+    <label for="id_title">Title</label>
+    {{ form.title }}
+    {{ form.title.errors }}
+  </div>
+
+  <div class="form-group">
+    <label for="id_content">Content</label>
+    {{ form.content }}
+    {{ form.content.errors }}
+  </div>
+
+  <div class="form-group">
+    <label for="id_tags_input">Tags</label>
+    {{ form.tags_input }}
+    {{ form.tags_input.errors }}
+    <small class="form-text text-muted">Comma-separated. Example: django, web, tutorial</small>
+  </div>
+
   <button type="submit" class="btn btn-primary">Save</button>
+  <a href="{% url 'blog:post_list' %}" class="btn btn-secondary">Cancel</a>
 </form>
 {% endblock %}
